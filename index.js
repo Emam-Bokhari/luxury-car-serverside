@@ -1,8 +1,8 @@
 
-const express=require("express")
-const cors=require("cors")
-const port=process.env.PORT||3000
-const app=express()
+const express = require("express")
+const cors = require("cors")
+const port = process.env.PORT || 3000
+const app = express()
 
 // middleware
 app.use(cors())
@@ -13,7 +13,7 @@ app.use(express.json())
 // tQpzf4pshYrTDdip
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = "mongodb+srv://luxury-car:tQpzf4pshYrTDdip@cluster0.kndeci6.mongodb.net/?retryWrites=true&w=majority";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -30,20 +30,47 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
 
-    const productCollection=client.db("productDB").collection("product")
+    const productCollection = client.db("productDB").collection("product")
+    
+    const cartCollection=client.db("cartsDB").collection("cart")
+
+    // read
+    app.get('/products', async (req, res) => {
+      const cursor = productCollection.find()
+      const result = await cursor.toArray()
+      res.send(result)
+    })
+
+    app.get('/products/:id',async(req,res)=>{
+      const id=req.params.id 
+      // console.log(id);
+      const query={_id:new ObjectId(id)}
+      const result=await productCollection.findOne(query)
+      res.send(result)
+      console.log(result);
+    })
+
+    // create
+    app.post('/product', async (req, res) => {
+      const newProduct = req.body
+      const result = await productCollection.insertOne(newProduct)
+      res.send(result)
+    })
 
 
-    app.get('/products',async(req,res)=>{
-      const cursor=productCollection.find()
+    // read
+    app.get('/cart',async(req,res)=>{
+      const cursor=cartCollection.find()
       const result=await cursor.toArray()
       res.send(result)
     })
 
+
     // create
-    app.post('/product',async(req,res)=>{
-        const newProduct=req.body 
-        const result=await productCollection.insertOne(newProduct)
-        res.send(result)
+    app.post('/cart',async(req,res)=>{
+      const newCart=req.body
+      const result=await cartCollection.insertOne(newCart)
+      res.send(result)
     })
 
 
@@ -58,10 +85,10 @@ async function run() {
 run().catch(console.dir);
 
 
-app.get('/',(req,res)=>{
-    res.send('Luxury Car server is running...')
+app.get('/', (req, res) => {
+  res.send('Luxury Car server is running...')
 })
 
-app.listen(port,(req,res)=>{
-    console.log(`port${port}`)
+app.listen(port, (req, res) => {
+  console.log(`port${port}`)
 })
