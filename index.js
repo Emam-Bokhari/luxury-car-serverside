@@ -51,9 +51,32 @@ async function run() {
     })
 
     // create
-    app.post('/product', async (req, res) => {
+    app.post('/products', async (req, res) => {
       const newProduct = req.body
       const result = await productCollection.insertOne(newProduct)
+      res.send(result)
+    })
+
+
+    // update
+    app.put('/products/:id',async(req,res)=>{
+      const id=req.params.id 
+      console.log(id);
+      const query={_id:new ObjectId(id)}
+      const updateProduct=req.body 
+      console.log(updateProduct);
+      const product={
+        $set:{
+          name:updateProduct.name,
+          brandName:updateProduct.brandName,
+          type:updateProduct.type,
+          rating:updateProduct.rating,
+          price:updateProduct.price,
+          photoURL:updateProduct.photoURL,
+          productDescription:updateProduct.productDescription
+        }
+      }
+      const result=await productCollection.updateOne(query,product)
       res.send(result)
     })
 
@@ -65,6 +88,7 @@ async function run() {
       res.send(result)
     })
 
+    
 
     // create
     app.post('/cart',async(req,res)=>{
@@ -73,6 +97,7 @@ async function run() {
       res.send(result)
     })
 
+   
     
     // delete
     app.delete('/cart/:id',async(req,res)=>{
